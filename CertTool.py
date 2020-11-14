@@ -74,7 +74,7 @@ def dummy_cert(cafile, certfile, commonname):
         cert = OpenSSL.crypto.X509()
         # Value 2 means v3
         cert.set_version(2)
-        cert.gmtime_adj_notBefore(0)
+        cert.gmtime_adj_notBefore(-60 * 60 * 24)
         cert.gmtime_adj_notAfter(60 * 60 * 24 * 3652)
         cert.set_issuer(ca.get_subject())
         if commonname.startswith('.'):
