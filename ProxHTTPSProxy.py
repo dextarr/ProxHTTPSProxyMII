@@ -80,6 +80,7 @@ class ConnectionPools:
             self.pools.append(dict(proxy=proxy,
                                    pool=self.setProxyPool(proxy),
                                    patterns=list(self.conf[section].keys())))
+        self.requested_loglevel = self.conf['GENERAL'].get('LogLevel')
         default_proxy = self.conf['GENERAL'].get('DefaultProxy')
         default_pool = (self.setProxyPool(default_proxy) if default_proxy else
                         [urllib3.PoolManager(num_pools=10, maxsize=8, timeout=self.timeout, **self.sslparams),
@@ -97,6 +98,7 @@ class ConnectionPools:
             if mtime > self.file_timestamp:
                 self.file_timestamp = mtime
                 self.loadConfig()
+                logger.setLevel(getattr(logging, self.requested_loglevel, logging.INFO))
                 logger.info(Fore.RED + Style.BRIGHT
                              + "*" * 20 + " CONFIG RELOADED " + "*" * 20)
             time.sleep(1)
