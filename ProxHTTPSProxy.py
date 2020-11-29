@@ -27,6 +27,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 from ProxyTool import ProxyRequestHandler, get_cert, counter
 
+from CertTool import populate_secondleveldomainlist
+
 from colorama import init, Fore, Back, Style
 init(autoreset=True)
 
@@ -87,6 +89,8 @@ class ConnectionPools:
                          urllib3.PoolManager(num_pools=10, maxsize=8, timeout=self.timeout)])
         self.pools.append({'proxy': default_proxy, 'pool': default_pool, 'patterns': '*'})
 
+        self.secondleveldomainlist = list(self.conf['Second Level Domain'].keys())
+        populate_secondleveldomainlist(self.secondleveldomainlist)
         self.noverifylist = list(self.conf['SSL No-Verify'].keys())
         self.blacklist = list(self.conf['BLACKLIST'].keys())
         self.sslpasslist = list(self.conf['SSL Pass-Thru'].keys())
@@ -164,8 +168,8 @@ class FrontRequestHandler(ProxyRequestHandler):
             self.wfile.write(("HTTP/1.1 200 Connection established\r\n" +
                               "Proxy-agent: %s\r\n" % self.version_string() +
                               "\r\n").encode('ascii'))
-            commonname = '.' + self.host.partition('.')[-1] if self.host.count('.') >= 2 else self.host
-            dummycert = get_cert(commonname)
+            dummycert = get_cert(self.host)
+
             # set a flag for do_METHOD
             self.ssltunnel = True
 

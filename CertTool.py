@@ -10,10 +10,16 @@ CA = "CA.crt"
 CERTDIR = "Certs"
 # Temp list for generating certs
 workingList = set()
+secondleveldomainList = set()
 
 import os
 import time
 import OpenSSL
+
+def populate_secondleveldomainlist(domainList):
+    for domain in domainList:
+        if domain not in secondleveldomainList:
+            secondleveldomainList.add(domain)
 
 def create_CA(capath):
     key = OpenSSL.crypto.PKey()
@@ -43,13 +49,16 @@ def create_CA(capath):
     with open(capath, 'wb') as fp:
         fp.write(OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, ca))
         fp.write(OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key))
-    
+
 def get_cert(name, cafile=CA, certdir=CERTDIR):
     """Return cert file path. Create it if it doesn't exist.
 
     cafile: the CA file to create dummpy cert files
     certdir: the path where cert files are looked for or created
     """
+    if name.count('.') >= 2 and name.partition('.')[-1] not in secondleveldomainList or name.count('.') >= 3:
+      name = '.' + name.partition('.')[-1]
+
     certfile = os.path.join(certdir, name + '.crt')
     if not os.path.exists(certfile):
         dummy_cert(cafile, certfile, name)

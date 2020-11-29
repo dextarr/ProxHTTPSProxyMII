@@ -92,8 +92,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(("HTTP/1.1 200 Connection established\r\n" +
                           "Proxy-agent: %s\r\n" % self.version_string() +
                           "\r\n").encode('ascii'))
-        commonname = '.' + self.host.partition('.')[-1] if self.host.count('.') >= 2 else self.host
-        dummycert = get_cert(commonname)
+        dummycert = get_cert(self.host)
         # set a flag for do_METHOD
         self.ssltunnel = True
 
